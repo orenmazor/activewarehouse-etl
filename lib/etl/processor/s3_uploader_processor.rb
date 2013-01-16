@@ -22,8 +22,10 @@ module ETL
       end
       
       def process
+        return if ETL::Engine.skip_bulk_import
+        return if File.size(file) == 0
       	s3 = RightAws::S3Interface.new(@aws_access_key_id, @aws_secret_access_key, @options) 
-  		s3.put(@bucket_name,@remote_key,File.open(@local_file))
+  		  s3.put(@bucket_name,@remote_key,File.open(@local_file))
       end
 
     end

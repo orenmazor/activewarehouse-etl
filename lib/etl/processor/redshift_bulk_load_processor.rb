@@ -16,6 +16,8 @@ module ETL
       end
       
       def process
+        return if ETL::Engine.skip_bulk_import
+        return if File.size(file) == 0
         conn = ETL::Engine.connection(target)
         conn.execute("COPY #{@table_name} [(#{@columns.join(',')})] FROM '#{@s3object}' CREDENTIALS '#{aws_credentials}' DELIMITER AS ',';")
       end
