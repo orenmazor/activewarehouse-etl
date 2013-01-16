@@ -3,7 +3,7 @@ module ETL #:nodoc:
     # Base class for ETL execution information
     class Base < ActiveRecord::Base
       self.abstract_class = true
-      establish_connection :etl_execution
+      establish_connection ETL::Engine.execution_dbname
     end
   end
 end

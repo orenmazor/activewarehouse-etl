@@ -26,6 +26,7 @@ module ETL #:nodoc:
           @skip_bulk_import = options[:skip_bulk_import]
           @read_locally = options[:read_locally]
           @rails_root = options[:rails_root]
+          @execution_dbname = options[:execution_dbname]
           
           require File.join(@rails_root, 'config/environment') if @rails_root
           options[:config] ||= 'database.yml'
@@ -36,7 +37,7 @@ module ETL #:nodoc:
           #puts "configurations in init: #{ActiveRecord::Base.configurations.inspect}"
           
           require 'etl/execution'
-          ETL::Execution::Base.establish_connection :etl_execution
+          ETL::Execution::Base.establish_connection @execution_dbname
           ETL::Execution::Execution.migrate
 
           @initialized = true
@@ -136,6 +137,9 @@ module ETL #:nodoc:
       
       # Accessor for the average rows per second processed
       attr_accessor :average_rows_per_second
+
+      # Accessor for the execution_dbname
+      attr_accessor :execution_dbname
       
       # Get a named connection
       def connection(name)
