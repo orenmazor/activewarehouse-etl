@@ -45,6 +45,8 @@ module ETL #:nodoc:
             t.column :created_at, :datetime, :null => false
             t.column :completed_at, :datetime
             t.column :status, :string
+            t.column :rows_read, :integer
+            t.column :rows_written, :integer
           end
           connection.create_table :records do |t|
             t.column :control_file, :string, :null => false

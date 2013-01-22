@@ -508,6 +508,8 @@ module ETL #:nodoc:
       ActiveRecord::Base.verify_active_connections!
       ETL::Engine.job.completed_at = Time.now
       ETL::Engine.job.status = (errors.length > 0 ? 'completed with errors' : 'completed')
+      ETL::Engine.job.rows_read = @rows_read
+      ETL::Engine.job.rows_written = @rows_written
       ETL::Engine.job.save!
     end
     
