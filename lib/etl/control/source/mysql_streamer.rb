@@ -50,7 +50,7 @@ class MySqlStreamer
     password = config[:password] # this one can omitted in some cases
     port = config[:port]
 
-    mysql_command = """mysql --quick -h #{host} -P #{port} -u #{username} -e \"#{@query.gsub("\n","")}\" -D #{database} --password=#{password} -B"""
+    mysql_command = """mysql --quick --default-character-set=utf8 -h #{host} -P #{port} -u #{username} -e \"#{@query.gsub("\n","")}\" -D #{database} --password=#{password} -B"""
     Open3.popen3(mysql_command) do |stdin, out, err, external|
       until (line = out.gets).nil? do
         line = line.gsub("\n","")
