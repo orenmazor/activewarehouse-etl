@@ -74,7 +74,7 @@ module ETL #:nodoc:
           else
             @logger = Logger.new(File.open('etl.log', log_write_mode))
           end
-          @logger.level = Logger::DEBUG
+          @logger.level = Logger::WARN
           @logger.formatter = Logger::Formatter.new
         end
         @logger
