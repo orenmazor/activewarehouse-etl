@@ -4,6 +4,9 @@ module ETL #:nodoc:
     class Source
       include Enumerable
       
+      # The name of the control
+      attr_accessor :control_name
+
       # The control object
       attr_accessor :control
       
@@ -36,6 +39,7 @@ module ETL #:nodoc:
       # * <tt>:store_locally</tt>: Set to false to not store source data
       #   locally (defaults to true)
       def initialize(control, configuration, definition)
+        @control_name = configuration[:control_name]
         @control = control
         @configuration = configuration
         @definition = definition

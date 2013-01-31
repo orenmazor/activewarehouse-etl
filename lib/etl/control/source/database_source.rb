@@ -48,7 +48,7 @@ module ETL #:nodoc:
       
       # Get a String identifier for the source
       def to_s
-        "#{host}/#{database}/#{@table}"
+        "#{host}/#{database}/#{@control_name}"
       end
       
       # Get the local directory to use, which is a combination of the 
