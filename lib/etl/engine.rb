@@ -26,7 +26,7 @@ module ETL #:nodoc:
           @skip_bulk_import = options[:skip_bulk_import]
           @read_locally = options[:read_locally]
           @rails_root = options[:rails_root]
-          @execution_dbname = options[:execution_dbname]
+          @execution_dbname = options[:execution_dbname] || "etl_execution"
           
           require File.join(@rails_root, 'config/environment') if @rails_root
           options[:config] ||= 'database.yml'
