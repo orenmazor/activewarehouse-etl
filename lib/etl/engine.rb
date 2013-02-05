@@ -314,7 +314,7 @@ module ETL #:nodoc:
       say_on_own_line "Processing control #{control.file}"
       
       ETL::Engine.job = ETL::Execution::Job.create!(
-        :control_file => control.file, 
+        :control_file => control.file.split('/').last, 
         :status => 'executing',
         :batch_id => ETL::Engine.batch ? ETL::Engine.batch.id : nil
       )
