@@ -177,7 +177,7 @@ module ETL #:nodoc:
         conditions = []
         if new_records_only
           last_completed = ETL::Execution::Job.maximum('created_at', 
-            :conditions => ['control_file = ? and completed_at is not null', control.file]
+            :conditions => ['control_file = ? and completed_at is not null', control.file.to_s.split("/").last]
           )
           if last_completed
             conditions << "#{new_records_only} > #{connection.quote(last_completed.to_s(:db))}"
