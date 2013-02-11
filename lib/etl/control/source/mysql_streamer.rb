@@ -21,7 +21,7 @@ class MySqlStreamer
     # in the SQL - its bound to cause trouble
     @query = query.split.join(' ')
     @name = target
-    @first_row = connection.execute("#{query} LIMIT 1")
+    @first_row = connection.select_all("#{query} LIMIT 1")
   end
 
   # We implement some bits of a hash so that database_source
@@ -48,7 +48,7 @@ class MySqlStreamer
     username = mandatory_option!(config, :username)
     database = mandatory_option!(config, :database)
     password = config[:password] # this one can omitted in some cases
-    port = config[:port]
+    port = config[:port] || 3306
 
     mysql_command = """mysql --quick --default-character-set=utf8 -h #{host} -P #{port} -u #{username} -e \"#{@query.gsub("\n","")}\" -D #{database} --password=#{password} -B"""
     Open3.popen3(mysql_command) do |stdin, out, err, external|
