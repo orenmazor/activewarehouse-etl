@@ -100,6 +100,7 @@ class SourceTest < Test::Unit::TestCase
         :database => 'etl_unittest',
         :target => :operational_database,
         :table => 'people',
+        :control_name => "people"
       }
       definition = [ 
         :first_name,

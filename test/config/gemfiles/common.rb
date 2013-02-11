@@ -26,4 +26,5 @@ def declare_gems(activerecord_version)
   gem 'fastercsv'
 
   gem 'standalone_migrations'
+  gem 'right_aws'
 end
