@@ -15,7 +15,9 @@ mysql2: &mysql2
 postgresql: &postgresql
   adapter: postgresql
   database: activewarehouse_etl_test
-  username: postgres
+  username: <%= `whoami` %>
+  port: 5432
+  host: localhost
 
 # TODO - refactor test to avoid using 2 databases maybe?
 operational_database:
