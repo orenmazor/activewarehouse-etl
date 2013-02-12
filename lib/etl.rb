@@ -81,6 +81,7 @@ require 'etl/transform'
 require 'etl/processor'
 require 'etl/generator'
 require 'etl/screen'
+require 'etl/zmq_workers'
 
 module ETL #:nodoc:
   class ETLError < StandardError #:nodoc:

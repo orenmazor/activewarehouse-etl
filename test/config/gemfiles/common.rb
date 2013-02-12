@@ -27,4 +27,7 @@ def declare_gems(activerecord_version)
 
   gem 'standalone_migrations'
   gem 'right_aws'
+
+  gem 'ffi-rzmq'
+  gem 'bert'
 end

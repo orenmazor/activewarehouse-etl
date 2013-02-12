@@ -27,6 +27,8 @@ module ETL #:nodoc:
           @read_locally = options[:read_locally]
           @rails_root = options[:rails_root]
           @execution_dbname = options[:execution_dbname] || "etl_execution"
+          @num_row_workers = options[:num_row_workers] || 4
+          @zero_mq_context = ZMQ::Context.new(1)
           
           require File.join(@rails_root, 'config/environment') if @rails_root
           options[:config] ||= 'database.yml'
@@ -140,6 +142,12 @@ module ETL #:nodoc:
 
       # Accessor for the execution_dbname
       attr_accessor :execution_dbname
+
+      # accessor for the num of row workers
+      attr_accessor :num_row_workers
+
+      # accessor for the zmq context
+      attr_accessor :zero_mq_context
       
       # Get a named connection
       def connection(name)
@@ -307,7 +315,7 @@ module ETL #:nodoc:
       ETL::Engine.batch.status = (errors.length > 0 ? 'completed with errors' : 'completed')
       ETL::Engine.batch.save!
     end
-    
+
     # Process the specified control file
     def process_control(control)
       control = ETL::Control::Control.resolve(control)
@@ -325,16 +333,23 @@ module ETL #:nodoc:
       pre_process(control)
       sources = control.sources
       destinations = control.destinations
-      
+
       say "Skipping bulk import" if Engine.skip_bulk_import
-      
+
       sources.each do |source|
         Engine.current_source = source
         Engine.logger.debug "Processing source #{source.inspect}"
         say "Source: #{source}"
         say "Limiting enabled: #{Engine.limit}" if Engine.limit != nil
         say "Offset enabled: #{Engine.offset}" if Engine.offset != nil
+
+        #this will grab all of the processed rows from our workers
+        collector = ETL::RowCollector.new(Engine.zero_mq_context)
+
+        #this will handle distributing rows for processing
+        distributor = ETL::RowDistributor.new(Engine.zero_mq_context,Engine.num_row_workers,collector)
         source.each_with_index do |row, index|
+
           # Break out of the row loop if the +Engine.limit+ is specified and 
           # the number of rows read exceeds that value.
           if Engine.limit != nil && Engine.rows_read >= Engine.limit
@@ -451,7 +466,7 @@ module ETL #:nodoc:
         end
         
       end
-      
+
       destinations.each do |destination|
         destination.close
       end
@@ -513,6 +528,9 @@ module ETL #:nodoc:
       ETL::Engine.job.save!
     end
     
+    def process_row(row, index)
+    end
+
     def empty_row?(row)
       # unsure about why it should respond to :[] - keeping it just in case for the moment
       row.nil? || !row.respond_to?(:[])
