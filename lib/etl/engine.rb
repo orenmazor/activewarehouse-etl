@@ -28,7 +28,6 @@ module ETL #:nodoc:
           @rails_root = options[:rails_root]
           @execution_dbname = options[:execution_dbname] || "etl_execution"
           @num_row_workers = options[:num_row_workers] || 4
-          @zero_mq_context = ZMQ::Context.new(1)
           
           require File.join(@rails_root, 'config/environment') if @rails_root
           options[:config] ||= 'database.yml'
@@ -145,9 +144,6 @@ module ETL #:nodoc:
 
       # accessor for the num of row workers
       attr_accessor :num_row_workers
-
-      # accessor for the zmq context
-      attr_accessor :zero_mq_context
       
       # Get a named connection
       def connection(name)
@@ -343,13 +339,19 @@ module ETL #:nodoc:
         say "Limiting enabled: #{Engine.limit}" if Engine.limit != nil
         say "Offset enabled: #{Engine.offset}" if Engine.offset != nil
 
-        #this will grab all of the processed rows from our workers
-        collector = ETL::RowCollector.new(Engine.zero_mq_context)
 
+        zero_mq_context = ZMQ::Context.create
+
+        #this will grab all of the processed rows from our workers
+        collector = ETL::RowCollector.new(zero_mq_context)
+      
         #this will handle distributing rows for processing
-        distributor = ETL::RowDistributor.new(Engine.zero_mq_context,Engine.num_row_workers,collector)
+        distributor = ETL::RowDistributor.new(zero_mq_context,Engine.num_row_workers)
+
         source.each_with_index do |row, index|
 
+          distributor.distribute(index,row)
+          
           # Break out of the row loop if the +Engine.limit+ is specified and 
           # the number of rows read exceeds that value.
           if Engine.limit != nil && Engine.rows_read >= Engine.limit
@@ -460,12 +462,20 @@ module ETL #:nodoc:
           benchmarks[:writes] += t unless t.nil?
         end
         
+        collected_rows = collector.finish(distributor.rows_read)
+        distributor.stop
+        distributor = nil
+        collector = nil
+        zero_mq_context = nil
+        
+
         if exceeded_error_threshold?(control)
           say_on_own_line "Exiting due to exceeding error threshold: #{control.error_threshold}"
           ETL::Engine.exit_code = 1
         end
         
       end
+
 
       destinations.each do |destination|
         destination.close

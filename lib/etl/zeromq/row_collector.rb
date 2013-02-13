@@ -1,13 +1,39 @@
 require 'ffi-rzmq'
+require 'bert'
 
 module ETL
   class RowCollector
+
+    attr_accessor :run
+
     def initialize(context)
-      @receiver = context.socket(ZMQ::PULL)
-      @receiver.bind("tcp://*:5558")
+      @collected_rows = []
+      @run = true
+      @rows_read = 0
+      @collector_thread = Thread.new do
+        @receiver = context.socket(ZMQ::PULL)
+        @receiver.bind("tcp://127.0.0.1:5558")
+
+        while @run
+          res = @receiver.recv_string(message = '',ZMQ::NonBlocking)
+          if res > -1
+            decoded_row = BERT.decode(message)
+            @collected_rows << decoded_row
+          end
+        end
+
+        @receiver.close()
+      end
     end
 
-    def collect(num_of_rows)
+    def workers_available
+
+    end
+
+    def finish(rows_read)
+      @run = false
+      @collector_thread.join unless @collector_thread.nil?
+      @collected_rows
     end
   end
 end
