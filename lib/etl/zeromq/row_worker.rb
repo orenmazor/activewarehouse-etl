@@ -8,7 +8,7 @@ module ETL
     def initialize(context, id)
       @run = true
       @ready = false
-      working_thread = Thread.new(@run) do
+      working_thread = Thread.new do
         @receiver = context.socket(ZMQ::PULL)
         @receiver.connect("tcp://127.0.0.1:5557")
 
@@ -19,11 +19,13 @@ module ETL
         @id = id
 
         while @run
-          result = @receiver.recv_string(message='')
-          raw_row = BERT.decode(message)
-          processed_row = [1,2,3,4,5]
-          #when done, push it along
-          @collector.send_string(BERT.encode(processed_row))
+          result = @receiver.recv_string(message='',ZMQ::NonBlocking)
+          if result > -1
+            raw_row = BERT.decode(message)
+            processed_row = [1,2,3,4,5]
+            #when done, push it along
+            @collector.send_string(BERT.encode(processed_row))
+          end
         end
 
         @receiver.close()

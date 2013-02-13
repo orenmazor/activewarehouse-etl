@@ -462,8 +462,8 @@ module ETL #:nodoc:
           benchmarks[:writes] += t unless t.nil?
         end
         
-        collected_rows = collector.finish(distributor.rows_read)
         distributor.stop
+        collected_rows = collector.finish
         distributor = nil
         collector = nil
         zero_mq_context = nil
