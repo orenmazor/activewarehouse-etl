@@ -325,6 +325,9 @@ module ETL #:nodoc:
       pre_process(control)
       sources = control.sources
       destinations = control.destinations
+
+      #reset the rows count for every control
+      Engine.rows_read = 0
       
       say "Skipping bulk import" if Engine.skip_bulk_import
       
