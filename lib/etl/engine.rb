@@ -376,16 +376,15 @@ module ETL #:nodoc:
           end
           benchmarks[:after_reads] += t unless t.nil?
           
+          rows.compact!
           t = Benchmark.realtime do
             begin
               Engine.logger.debug "Executing transforms"
               rows.each do |row|
                 # only do the transform if there is a row
-                unless empty_row?(row)
-                  control.transforms.each do |transform|
-                    name = transform.name.to_sym
-                    row[name] = transform.transform(name, row[name], row)
-                  end
+                control.transforms.each do |transform|
+                  name = transform.name.to_sym
+                  row[name] = transform.transform(name, row[name], row)
                 end
               end
             rescue ResolverError => e

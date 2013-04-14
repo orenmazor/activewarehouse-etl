@@ -67,7 +67,8 @@ module ETL #:nodoc:
           #puts "row change type: #{row.change_type}"
           # check to see if this row's compound key constraint already exists
           # note that the compound key constraint may not utilize virtual fields
-          next unless row_allowed?(row)
+          # why do we have two ways of verifying uniqueness? - Oren
+          # next unless row_allowed?(row)
           
           # add any virtual fields
           add_virtuals!(row)
@@ -93,10 +94,7 @@ module ETL #:nodoc:
           end
           
           # write the values joined by the separator defined in the configuration
-          f.write(values.join(separator))
-          
-          # write the end-of-line
-          f.write(eol)
+          f.write(values.join(separator) + eol)
         end
         f.flush
         buffer.clear
