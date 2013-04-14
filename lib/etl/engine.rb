@@ -27,6 +27,7 @@ module ETL #:nodoc:
           @read_locally = options[:read_locally]
           @rails_root = options[:rails_root]
           @execution_dbname = options[:execution_dbname] || "etl_execution"
+          @initial_upload = options[:initial_upload]
           
           require File.join(@rails_root, 'config/environment') if @rails_root
           options[:config] ||= 'database.yml'
@@ -140,6 +141,9 @@ module ETL #:nodoc:
 
       # Accessor for the execution_dbname
       attr_accessor :execution_dbname
+
+      # set to true to skip SCD checks on initial import
+      attr_accessor :initial_upload
       
       # Get a named connection
       def connection(name)

@@ -192,7 +192,7 @@ module ETL #:nodoc:
       def process_change(row)
         ETL::Engine.logger.debug "Processing row: #{row.inspect}"
         return unless row
-        
+
         # Change processing can only occur if the natural key exists in the row 
         ETL::Engine.logger.debug "Checking for natural key existence"
         unless has_natural_key?(row)
@@ -208,7 +208,7 @@ module ETL #:nodoc:
         # to process). If they do not match then the record is an
         # 'update'. If the record doesn't exist then it is an 'insert'
         ETL::Engine.logger.debug "Checking record for SCD change"
-        if @existing_row = preexisting_row(row)
+        if not ETL::Engine.initial_upload and @existing_row = preexisting_row(row)
           if has_scd_field_changes?(row)
             process_scd_change(row)
           else
